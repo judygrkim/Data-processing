@@ -1,0 +1,43 @@
+from math import nan
+import os
+from netCDF4 import Dataset
+import xarray as xr
+
+path = '/Data/home/grkim/gr_ar/latest_data/test/'
+file_list = os.listdir(path)
+file_list_py = [file for file in file_list if file.endswith('.nc')]
+
+
+for name in file_list_py:
+    data1 = xr.open_dataset(path+name)
+    ds   = xr.Dataset({
+            'TMQ': xr.DataArray(
+                    data    = data1['TMQ'],
+                    dims    = ['time', 'lat', 'lon'],
+                    coords  = {'time':data1.time, 'lat':data1.lat, 'lon':data1.lon},
+                    attrs   = {
+                        '_FillValue': nan,
+                        'units'     : 'kg/m^2',
+                        'description': 'total (vertically integrated) precipitable water'
+                        }),
+            'U850': xr.DataArray(
+                    data    = data1['U850'],
+                    dims    = ['time', 'lat', 'lon'],
+                    coords  = {'time':data1.time, 'lat':data1.lat, 'lon':data1.lon},
+                    attrs   = {
+                        '_FillValue': nan,
+                         'units'     :'m/s',
+                         'description': 'zonal wind at 850 mbar pressure surface'
+                         }),
+            'V850': xr.DataArray(
+                    data    = data1['V850'],
+                    dims    = ['time', 'lat', 'lon'],
+                    coords  = {'time':data1.time, 'lat':data1.lat, 'lon':data1.lon},
+                    attrs   = {
+                        '_FillValue': nan,
+                        'units'     :'m/s',
+                        'description': 'meridional wind at 850 mbar pressure surface'
+                         }) })
+    name_slice = name.replace('.nc', '')
+    ds.to_netcdf(path+'slice/'+name_slice+'slice.nc')
+    print(name_slice+'_slice.nc')
